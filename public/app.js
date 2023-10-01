@@ -1,10 +1,12 @@
+const {coll} = require('../src/conn');
+
 document.addEventListener("DOMContentLoaded", function () {
     const temperatureInput = document.getElementById("temperatureInput");
     const unitSelector = document.getElementById("unitSelector");
     const convertButton = document.getElementById("convertButton");
     const result = document.getElementById("result");
 
-    convertButton.addEventListener("click", function () {
+    convertButton.addEventListener("click", async function () {
         const inputValue = parseFloat(temperatureInput.value);
         const selectedUnit = unitSelector.value;
 
@@ -24,6 +26,17 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             result.textContent = `Converted Temperature: ${convertedTemperature.toFixed(2)} ${unit}`;
+
+            // Save the result and current time to MongoDB
+
+            try {
+                const currentTime = new Date();
+                await coll.insertOne({ temperature: convertedTemperature.toFixed(2), unit, time: currentTime });
+                console.log("Result saved to MongoDB.");
+            } catch (error) {
+                console.error("Error saving result to MongoDB:", error);
+            }
+
         } else {
             result.textContent = "Please enter a valid number.";
         }
